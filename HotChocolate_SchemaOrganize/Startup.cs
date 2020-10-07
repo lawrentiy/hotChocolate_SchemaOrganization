@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HotChocolate;
+using HotChocolate.AspNetCore;
+using HotChocolate.AspNetCore.Playground;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -26,23 +29,20 @@ namespace HotChocolate_SchemaOrganize
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddGraphQL(sp => SchemaBuilder.New()
+                .AddQueryType<Query>()
+                .AddServices(sp)
+                .Create());
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseGraphQL("/graphql");
+            app.UsePlayground(new PlaygroundOptions { QueryPath = "/graphql", Path = "/playground" });
         }
     }
 }
